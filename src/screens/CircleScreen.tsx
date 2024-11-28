@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 import { RootStackParamList } from '../../app';
+import Header from '../components/Header';
 
 type Props = {
     navigation: StackNavigationProp<RootStackParamList, 'CirclesScreen'>;
@@ -20,6 +21,8 @@ const { width, height } = Dimensions.get('window');
 const CIRCLE_SIZE = 80;
 
 const CirclesScreen: React.FC<Props> = ({ navigation }) => {
+    const [unlocked, setUnlocked] = useState<number[]>([]);
+
     const [selectedCircles, setSelectedCircles] = useState<number[]>([]);
     const [centralCircle, setCentralCircle] = useState(false);
     const [showPopup, setShowPopup] = useState<number | null>(null); // Track which circle's popup to show
