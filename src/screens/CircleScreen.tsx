@@ -69,7 +69,7 @@ const CirclesScreen: React.FC<Props> = ({ navigation }) => {
 
     const handleTestButtonPress = () => {
         if (centralCircle) {
-            navigation.navigate('WorkInProgress');
+            navigation.navigate('GameScreen');
         } else if (selectedCircles.length === circlesData.length) {
             setCentralCircle(true);
         } else {
