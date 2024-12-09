@@ -126,7 +126,7 @@ const HoldingHandsScreen: React.FC<Props> = ({ navigation }) => {
             {showContinue && positionsSwapped && (
                 <TouchableOpacity
                     style={styles.continueButton}
-                    onPress={() => navigation.navigate('WorkInProgress')}
+                    onPress={() => navigation.navigate('PickRightScreen')}
                 >
                     <Text style={styles.buttonText}>Continue</Text>
                 </TouchableOpacity>

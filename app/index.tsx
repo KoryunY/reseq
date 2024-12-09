@@ -35,13 +35,20 @@ export default function App() {
           component={StartScreen}
           options={{ headerShown: false }}
         /> */}
-        <Stack.Screen
+        {/* <Stack.Screen
           name="CirclesScreen"
           component={CirclesScreen}
           options={{
             header: () => <Header unlockedIndexes={[]} />,
           }}
-        />
+        /> */}
+        {/* <Stack.Screen
+          name="GameScreen"
+          component={GameScreen}
+          options={{
+            header: () => <Header unlockedIndexes={[0]} />,
+          }}
+        /> */}
         {/* Header with unlockedIndexes for other screens */}
         {/* 
 
@@ -52,20 +59,14 @@ export default function App() {
             header: () => <Header unlockedIndexes={[0]} />,
           }}
         /> 
+        */}
         <Stack.Screen
-          name="GameScreen"
-          component={GameScreen}
-          options={{
-            header: () => <Header unlockedIndexes={[0]} />,
-          }}
-        />*/}
-        {/* <Stack.Screen
           name="HoldingHandsScreen"
           component={HoldingHandsScreen}
           options={{
             header: () => <Header unlockedIndexes={[0, 1]} />,
           }}
-        /> */}
+        />
         {/* <Stack.Screen
           name="PickRightScreen"
           component={PickRightScreen}
