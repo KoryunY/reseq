@@ -35,15 +35,15 @@ export default function App() {
           component={StartScreen}
           options={{ headerShown: false }}
         /> */}
-
-        {/* Header with unlockedIndexes for other screens */}
-        {/* <Stack.Screen
+        <Stack.Screen
           name="CirclesScreen"
           component={CirclesScreen}
           options={{
             header: () => <Header unlockedIndexes={[]} />,
           }}
         />
+        {/* Header with unlockedIndexes for other screens */}
+        {/* 
 
         <Stack.Screen
           name="WorkInProgress"
@@ -80,13 +80,13 @@ export default function App() {
             header: () => <Header unlockedIndexes={[0, 1, 2, 3]} />,
           }}
         /> */}
-        <Stack.Screen
+        {/* <Stack.Screen
           name="BossFightScreen"
           component={BossFightScreen}
           options={{
             header: () => <Header unlockedIndexes={[0, 1, 2, 3]} />,
           }}
-        />
+        /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
