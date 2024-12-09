@@ -15,127 +15,95 @@ type Props = {
 };
 
 const HoldingHandsScreen: React.FC<Props> = ({ navigation }) => {
-    const [isHoldingHands, setIsHoldingHands] = useState(false);
-    const [positionsSwapped, setPositionsSwapped] = useState(false);
-    const [rejection, setRejection] = useState(false);
-    const [showContinue, setShowContinue] = useState(false);
-    const [girlPosition, setGirlPosition] = useState({ x: 0, y: 0 });
-    const [textShown, setTextShown] = useState(false);
-    const [girlInSquare, setGirlInSquare] = useState(false);
-    const [currentSide, setCurrentSide] = useState<'left' | 'right' | 'none'>('none');
+    const [positionsCorrect, setPositionsCorrect] = useState(false);
+    const [girlPosition, setGirlPosition] = useState({ x: 160, y: 260 });
+    const [boyPosition, setBoyPosition] = useState({ x: 160, y: -100 });
 
-    const handlePlacement = (side: 'left' | 'right') => {
-        if (side === 'left') {
-            setRejection(true);
-            setGirlInSquare(false);
-            setTimeout(() => setRejection(false), 1000); // Clear rejection after 1 second
-        } else if (side === 'right') {
-            setIsHoldingHands(true);
-            setGirlInSquare(false);
-            setTimeout(() => {
-                setPositionsSwapped(true);
-                setShowContinue(true);
-            }, 3000); // Swap positions after 3 seconds
+    // Handle the placement of the images inside the squares
+    const handlePlacement = () => {
+        if (boyPosition.x < 150 && girlPosition.x > 250) {
+            setPositionsCorrect(true);
+        } else {
+            setPositionsCorrect(false);
         }
     };
 
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            setTextShown(true);
-        }, 2000); // Show text after 2 seconds
-
-        return () => clearTimeout(timeout);
-    }, []);
-
-    const panResponder = PanResponder.create({
+    // Set up pan responder for the girl's position
+    const girlPanResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onPanResponderMove: (e, gestureState) => {
-            if (girlInSquare) {
-                setGirlPosition({
-                    x: gestureState.moveX - 40,
-                    y: gestureState.moveY - 40,
-                });
-            }
+            setGirlPosition({
+                x: gestureState.moveX - 40,
+                y: gestureState.moveY - 40,
+            });
         },
-        onPanResponderRelease: (e, gestureState) => {
-            if (gestureState.moveX < 100) {
-                setCurrentSide('left');
-                handlePlacement('left');
-            } else if (gestureState.moveX > 300) {
-                setCurrentSide('right');
-                handlePlacement('right');
-            } else {
-                setGirlPosition({ x: 150, y: 150 });
-                setCurrentSide('none');
-            }
+        onPanResponderRelease: handlePlacement,
+    });
+
+    // Set up pan responder for the boy's position
+    const boyPanResponder = PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onPanResponderMove: (e, gestureState) => {
+            setBoyPosition({
+                x: gestureState.moveX - 40,
+                y: gestureState.moveY - 40,
+            });
         },
+        onPanResponderRelease: handlePlacement,
     });
 
     return (
         <View style={styles.container}>
-            {/* Text that appears initially */}
-            {!textShown && (
-                <View style={styles.textContainer}>
-                    <Text style={styles.runningText}>The girl is unsure where to stand...</Text>
-                </View>
-            )}
-
             {/* Game area */}
-            {textShown && !positionsSwapped && (
+            {!positionsCorrect ? (
                 <View style={styles.street}>
-                    {/* Left Square */}
-                    <View
-                        style={[styles.square, { left: 50, top: '30%' }]}
-                        onLayout={() => setGirlInSquare(true)}
-                    >
+                    {/* Left Square for Boy */}
+                    <View style={[styles.square, { left: 50, top: '30%' }]}>
                         <Text style={styles.squareText}>Left</Text>
                     </View>
 
-                    {/* Boy in the middle */}
-                    <Image source={require('../../assets/images/boy.png')} style={styles.character} />
+                    {/* Boy Image */}
+                    <Image
+                        source={require('../../assets/images/boy.png')}
+                        style={[
+                            styles.character,
+                            { position: 'absolute', top: boyPosition.y, left: boyPosition.x },
+                        ]}
+                        {...boyPanResponder.panHandlers}
+                    />
 
-                    {/* Right Square */}
-                    <View
-                        style={[styles.square, { right: 50, top: '30%' }]}
-                        onLayout={() => setGirlInSquare(true)}
-                    >
+                    {/* Right Square for Girl */}
+                    <View style={[styles.square, { right: 50, top: '30%' }]}>
                         <Text style={styles.squareText}>Right</Text>
                     </View>
 
-                    {/* Girl Image (dragged) */}
+                    {/* Girl Image */}
                     <Image
                         source={require('../../assets/images/girl.png')}
                         style={[
                             styles.character,
-                            {
-                                position: 'absolute',
-                                top: girlPosition.y,
-                                left: girlPosition.x,
-                            },
+                            { position: 'absolute', top: girlPosition.y, left: girlPosition.x },
                         ]}
-                        {...panResponder.panHandlers}
+                        {...girlPanResponder.panHandlers}
                     />
                 </View>
-            )}
+            ) : (
+                <View style={styles.successContainer}>
+                    {/* Display the 'together' image when correct positions are achieved */}
+                    <Image source={require('../../assets/images/together.png')} style={styles.togetherImage} />
 
-            {/* Rejection or Handholding Message */}
-            {rejection && <Text style={styles.rejectionText}>No! She must be on the right.</Text>}
-            {isHoldingHands && !positionsSwapped && <Text style={styles.holdingText}>They are holding hands ❤️</Text>}
-
-            {/* Continue Button */}
-            {showContinue && positionsSwapped && (
-                <TouchableOpacity
-                    style={styles.continueButton}
-                    onPress={() => navigation.navigate('PickRightScreen')}
-                >
-                    <Text style={styles.buttonText}>Continue</Text>
-                </TouchableOpacity>
+                    {/* Continue Button */}
+                    <TouchableOpacity
+                        style={styles.continueButton}
+                        onPress={() => navigation.navigate('PickRightScreen')}
+                    >
+                        <Text style={styles.buttonText}>Continue</Text>
+                    </TouchableOpacity>
+                </View>
             )}
         </View>
     );
 };
-
-export default HoldingHandsScreen;
 
 const styles = StyleSheet.create({
     container: {
@@ -143,15 +111,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#000',
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    textContainer: {
-        marginBottom: 30,
-    },
-    runningText: {
-        color: 'white',
-        fontSize: 20,
-        fontWeight: 'bold',
-        textAlign: 'center',
     },
     street: {
         flexDirection: 'row',
@@ -163,13 +122,9 @@ const styles = StyleSheet.create({
         padding: 20,
         position: 'relative',
     },
-    character: {
-        width: 80,
-        height: 80,
-    },
     square: {
         width: 80,
-        height: 80,
+        height: 160,
         backgroundColor: 'transparent',
         borderColor: 'white',
         borderWidth: 2,
@@ -181,15 +136,19 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
     },
-    rejectionText: {
-        color: 'red',
-        fontSize: 18,
-        marginTop: 10,
+    character: {
+        width: 80,
+        height: 160,
     },
-    holdingText: {
-        color: 'green',
-        fontSize: 18,
-        marginTop: 10,
+    successContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#000',
+        padding: 20,
+    },
+    togetherImage: {
+        width: 200,
+        height: 200,
     },
     continueButton: {
         borderColor: 'white',
@@ -203,3 +162,5 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
 });
+
+export default HoldingHandsScreen;
