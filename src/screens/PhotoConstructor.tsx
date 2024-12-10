@@ -1,186 +1,192 @@
+import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import {
-    View,
-    Text,
-    Image,
-    StyleSheet,
-    PanResponder,
-    Animated,
-    TouchableOpacity,
-} from 'react-native';
+    GestureHandlerRootView,
+    PanGestureHandler,
+    GestureHandlerStateChangeEvent,
+    GestureHandlerGestureEvent,
+    PanGestureHandlerGestureEvent,
+} from 'react-native-gesture-handler';
+import { RootStackParamList } from '../../app';
 
-type Photo = {
-    id: number;
-    source: any;
-    x: Animated.Value;
-    y: Animated.Value;
+// Image sources array for puzzles
+const imageSources = [
+    require('../../assets/images/puzzle1.png'),
+    require('../../assets/images/puzzle2.png'),
+    require('../../assets/images/puzzle3.png'),
+    require('../../assets/images/puzzle4.png'),
+    require('../../assets/images/puzzle5.png'),
+    require('../../assets/images/puzzle6.png'),
+    require('../../assets/images/puzzle7.png'),
+    require('../../assets/images/puzzle8.png'),
+    require('../../assets/images/puzzle9.png'),
+];
+
+// Types for the component
+type PhotoConstructorProps = {
+    navigation: StackNavigationProp<RootStackParamList, 'CirclesScreen'>;
 };
 
-const PhotoConstructor: React.FC = () => {
-    const initialPhotos = [
-        { id: 1, source: require('../../assets/images/icon.png') },
-        { id: 2, source: require('../../assets/images/eating-cat.png') },
-        { id: 3, source: require('../../assets/images/zombie-cat.png') },
-        { id: 4, source: require('../../assets/images/plant.png') },
-        { id: 5, source: require('../../assets/images/splash-icon.png') },
-        { id: 6, source: require('../../assets/images/react-logo.png') },
-        { id: 7, source: require('../../assets/images/partial-react-logo.png') },
-        { id: 8, source: require('../../assets/images/girl.png') },
-        { id: 9, source: require('../../assets/images/boy.png') },
-    ].map((photo) => ({
-        ...photo,
-        x: new Animated.Value(0),
-        y: new Animated.Value(0),
-    }));
+const PhotoConstructor: React.FC<PhotoConstructorProps> = ({ navigation }) => {
+    const [puzzleImages, setPuzzleImages] = useState(imageSources);
+    const [puzzleState, setPuzzleState] = useState<Array<any>>(Array(9).fill(null)); // tracks positions
+    const [completed, setCompleted] = useState(false);
 
-    const [photos, setPhotos] = useState<Photo[]>(initialPhotos);
-    const [grid, setGrid] = useState<Array<number | null>>(Array(9).fill(null));
-    const [isCorrect, setIsCorrect] = useState(false);
-
-    const checkCompletion = (newGrid: Array<number | null>) => {
-        const correctOrder = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-        const isCorrectPlacement = correctOrder.every((id, index) => newGrid[index] === id);
-        setIsCorrect(isCorrectPlacement);
-    };
-
-    const panResponder = (photo: Photo) =>
-        PanResponder.create({
-            onStartShouldSetPanResponder: () => true,
-            onPanResponderMove: (_, gestureState) => {
-                photo.x.setValue(gestureState.dx);
-                photo.y.setValue(gestureState.dy);
-            },
-            onPanResponderRelease: (_, gestureState) => {
-                const dropIndex = getDropZoneIndex(gestureState.moveX, gestureState.moveY);
-                if (dropIndex !== -1) {
-                    const newGrid = [...grid];
-                    newGrid[dropIndex] = photo.id;
-                    setGrid(newGrid);
-                    checkCompletion(newGrid);
-                }
-
-                // Reset position
-                Animated.spring(photo.x, { toValue: 0, useNativeDriver: false }).start();
-                Animated.spring(photo.y, { toValue: 0, useNativeDriver: false }).start();
-            },
-        });
-
-    const getDropZoneIndex = (x: number, y: number) => {
-        const gridSize = 3;
-        const cellSize = 100;
-        const margin = 10;
-        const offsetX = 50; // Adjust based on grid position
-        const offsetY = 50;
-
-        for (let row = 0; row < gridSize; row++) {
-            for (let col = 0; col < gridSize; col++) {
-                const cellX = offsetX + col * (cellSize + margin);
-                const cellY = offsetY + row * (cellSize + margin);
-
-                if (x > cellX && x < cellX + cellSize && y > cellY && y < cellY + cellSize) {
-                    return row * gridSize + col;
-                }
-            }
+    // Function to check if puzzle is solved
+    const checkCompletion = () => {
+        if (puzzleState.every((img, idx) => img === imageSources[idx])) {
+            setCompleted(true);
         }
-        return -1;
     };
+
+    // Handle drop event in a square
+    const onDrop = (index: number, droppedImage: any) => {
+        const newPuzzleState = [...puzzleState];
+        newPuzzleState[index] = droppedImage;
+        setPuzzleState(newPuzzleState);
+        checkCompletion();
+    };
+
+    // Handle drag event
+    const onGestureEvent = (event: GestureHandlerGestureEvent) => {
+        console.log(event);
+    };
+
+    const onHandlerStateChange = (event: GestureHandlerStateChangeEvent) => {
+        if (event.nativeEvent.state === 4) {
+            // Handle the drop when the drag ends
+            console.log('Drop finished');
+        }
+    };
+
+    // Shuffle images for the stack
+    const shuffledImages = [...puzzleImages].sort(() => Math.random() - 0.5);
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.instructions}>
-                Drag and drop the photos into the correct positions!
-            </Text>
-
-            <View style={styles.grid}>
-                {grid.map((photoId, index) => (
-                    <View key={index} style={styles.cell}>
-                        {photoId !== null && (
-                            <Image
-                                source={initialPhotos.find((photo) => photo.id === photoId)?.source}
-                                style={styles.cellImage}
-                            />
-                        )}
+        <GestureHandlerRootView style={styles.container}>
+            {!completed ? (
+                <>
+                    {/* Grid of squares */}
+                    <View style={styles.gridContainer}>
+                        {Array(9)
+                            .fill(null)
+                            .map((_, idx) => (
+                                <TouchableOpacity
+                                    key={idx}
+                                    style={styles.square}
+                                    onPress={() => onDrop(idx, shuffledImages[idx])}
+                                >
+                                    {puzzleState[idx] && (
+                                        <Image source={puzzleState[idx]} style={styles.squareImage} />
+                                    )}
+                                </TouchableOpacity>
+                            ))}
                     </View>
-                ))}
-            </View>
 
-            {!isCorrect && (
-                <View style={styles.stackContainer}>
-                    {photos.map((photo) => (
-                        <Animated.View
-                            key={photo.id}
-                            style={[
-                                styles.photo,
-                                { transform: [{ translateX: photo.x }, { translateY: photo.y }] },
-                            ]}
-                            {...panResponder(photo).panHandlers}
-                        >
-                            <Image source={photo.source} style={styles.photoImage} />
-                        </Animated.View>
-                    ))}
+                    {/* Stack of shuffled puzzle images */}
+                    {/* <View style={styles.stackContainer}>
+                        {shuffledImages.map((image, idx) => (
+                            <PanGestureHandler
+                                key={idx}
+                                onGestureEvent={onGestureEvent}
+                                onHandlerStateChange={onHandlerStateChange}
+                            >
+                                <View style={styles.stackImageWrapper}>
+                                    <Image source={image} style={styles.stackImage} />
+                                </View>
+                            </PanGestureHandler>
+                        ))}
+                    </View> */}
+
+                    {/* White outlined black square */}
+                    {/* <View style={styles.outlinedSquare} /> */}
+                </>
+            ) : (
+                // When puzzle is completed
+                <View style={styles.completedContainer}>
+                    <Image source={require('../../assets/images/puzzle.png')} style={styles.completedImage} />
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("CirclesScreen")}>
+                        <Text style={styles.buttonText}>Continue</Text>
+                    </TouchableOpacity>
                 </View>
             )}
-
-            {isCorrect && (
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Continue</Text>
-                </TouchableOpacity>
-            )}
-        </View>
+        </GestureHandlerRootView>
     );
 };
-
-export default PhotoConstructor;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
         backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 20,
+        paddingTop: 50,
     },
-    instructions: {
-        fontSize: 18,
+    header: {
+        fontSize: 24,
+        fontWeight: 'bold',
         marginBottom: 20,
-        textAlign: 'center',
     },
-    grid: {
+    gridContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        width: 330,
-        height: 330,
+        width: 300,
+        height: 300,
         marginBottom: 20,
     },
-    cell: {
-        width: 100,
-        height: 100,
+    square: {
+        width: 90,
+        height: 90,
+        borderWidth: 2,
+        borderColor: '#000',
         margin: 5,
-        backgroundColor: '#e0e0e0',
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#fff',
     },
-    cellImage: {
-        width: '100%',
-        height: '100%',
+    squareText: {
+        color: '#000',
+        fontSize: 18,
     },
-    stackContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-    },
-    photo: {
+    squareImage: {
         width: 80,
         height: 80,
-        margin: 5,
-        position: 'absolute',
+        borderWidth: 1,
+        borderColor: '#000',
     },
-    photoImage: {
-        width: '100%',
-        height: '100%',
+    stackContainer: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    stackImageWrapper: {
+        marginBottom: 10,
+    },
+    stackImage: {
+        width: 80,
+        height: 80,
+        borderWidth: 1,
+        borderColor: '#000',
+    },
+    outlinedSquare: {
+        width: 100,
+        height: 100,
+        borderWidth: 4,
+        borderColor: '#000',
+        backgroundColor: '#fff',
+    },
+    completedContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    completedImage: {
+        width: 300,
+        height: 300,
+        marginBottom: 20,
     },
     button: {
-        backgroundColor: '#4caf50',
+        backgroundColor: '#000',
         padding: 10,
         borderRadius: 5,
     },
@@ -189,3 +195,5 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
 });
+
+export default PhotoConstructor;

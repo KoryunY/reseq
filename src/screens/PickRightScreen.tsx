@@ -1,3 +1,4 @@
+import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState } from 'react';
 import {
     View,
@@ -6,22 +7,39 @@ import {
     StyleSheet,
     PanResponder,
     Animated,
+    TouchableOpacity,
+    Dimensions,
 } from 'react-native';
+import { RootStackParamList } from '../../app';
 
 type Figure = {
     id: number;
     type: 'correct' | 'incorrect';
     x: Animated.Value;
     y: Animated.Value;
+    source: any;
 };
 
-const PickRightScreen: React.FC = () => {
-    const [figures, setFigures] = useState<Figure[]>([
-        { id: 1, type: 'incorrect', x: new Animated.Value(0), y: new Animated.Value(0) },
-        { id: 2, type: 'correct', x: new Animated.Value(0), y: new Animated.Value(0) },
-        { id: 3, type: 'incorrect', x: new Animated.Value(0), y: new Animated.Value(0) },
-        { id: 4, type: 'correct', x: new Animated.Value(0), y: new Animated.Value(0) },
-    ]);
+type Props = {
+    navigation: StackNavigationProp<RootStackParamList, 'CirclesScreen'>;
+};
+const { width, height } = Dimensions.get('window');
+
+const outerFigures: Figure[] = [
+    { id: 1, type: 'incorrect', x: new Animated.Value(0), y: new Animated.Value(0), source: require("../../assets/images/incorrect.png") },
+    { id: 2, type: 'correct', x: new Animated.Value(0), y: new Animated.Value(0), source: require("../../assets/images/correct.png") },
+    { id: 3, type: 'incorrect', x: new Animated.Value(0), y: new Animated.Value(0), source: require("../../assets/images/incorrect1.png") },
+    { id: 4, type: 'incorrect', x: new Animated.Value(0), y: new Animated.Value(0), source: require("../../assets/images/incorrect2.png") },
+    { id: 5, type: 'incorrect', x: new Animated.Value(0), y: new Animated.Value(0), source: require("../../assets/images/incorrect3.png") },
+    { id: 6, type: 'incorrect', x: new Animated.Value(0), y: new Animated.Value(0), source: require("../../assets/images/incorrect4.png") },
+    { id: 7, type: 'incorrect', x: new Animated.Value(0), y: new Animated.Value(0), source: require("../../assets/images/incorrect5.png") },
+    { id: 8, type: 'incorrect', x: new Animated.Value(0), y: new Animated.Value(0), source: require("../../assets/images/incorrect6.png") },
+    { id: 9, type: 'incorrect', x: new Animated.Value(0), y: new Animated.Value(0), source: require("../../assets/images/incorrect7.png") },
+    { id: 10, type: 'incorrect', x: new Animated.Value(0), y: new Animated.Value(0), source: require("../../assets/images/incorrect8.png") },
+]
+
+const PickRightScreen: React.FC<Props> = ({ navigation }) => {
+    const [figures, setFigures] = useState<Figure[]>([...outerFigures]);
 
     const [message, setMessage] = useState<string>('');
     const [dropZoneLayout, setDropZoneLayout] = useState<{
@@ -46,6 +64,10 @@ const PickRightScreen: React.FC = () => {
             width: layout.width,
             height: layout.height,
         });
+    };
+
+    const handleRestart = () => {
+        setFigures([...outerFigures]);
     };
 
     const handleTrashCanLayout = (event: any) => {
@@ -90,13 +112,15 @@ const PickRightScreen: React.FC = () => {
             onPanResponderRelease: (_, gestureState) => {
                 if (isInsideDropZone(gestureState)) {
                     if (figure.type === 'correct') {
-                        setMessage('Correct choice!');
+                        //setMessage('Correct choice!');
                         setFigures((prev) => prev.filter((fig) => fig.id !== figure.id));
-                    } else {
-                        setMessage('Invalid choice! Try again or dispose.');
+                        navigation.navigate("PhotoConstructor")
                     }
+                    // else {
+                    //     setMessage('Invalid choice! Try again or dispose.');
+                    // }
                 } else if (isInsideTrashCan(gestureState)) {
-                    setMessage('Disposed!');
+                    //setMessage('Disposed!');
                     setFigures((prev) => prev.filter((fig) => fig.id !== figure.id));
                 } else {
                     // Reset position
@@ -108,15 +132,15 @@ const PickRightScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.instructions}>Drag the correct figure to the white square or dispose invalid ones in the trash can!</Text>
+            {/* <Text style={styles.instructions}>Drag the correct figure to the white square or dispose invalid ones in the trash can!</Text> */}
 
             <View style={styles.dropZone} onLayout={handleDropZoneLayout} />
             <View style={styles.trashCan} onLayout={handleTrashCanLayout}>
-                <Text style={styles.trashText}>🗑️ Trash</Text>
+                <Text style={styles.trashText}>🗑️</Text>
             </View>
 
             <View style={styles.stackContainer}>
-                {figures.map((figure) => (
+                {figures?.length > 0 ? figures.map((figure) => (
                     <Animated.View
                         key={figure.id}
                         style={[
@@ -127,17 +151,19 @@ const PickRightScreen: React.FC = () => {
                     >
                         <Image
                             source={
-                                figure.type === 'correct'
-                                    ? require('../../assets/images/correct.png')
-                                    : require('../../assets/images/incorrect.png')
+                                figure.source
                             }
                             style={styles.image}
                         />
                     </Animated.View>
-                ))}
+                )) : (
+                    <TouchableOpacity style={styles.testButton} onPress={handleRestart}>
+                        <Text style={styles.testButtonText}>Restart</Text>
+                    </TouchableOpacity>
+                )}
             </View>
 
-            {message && <Text style={styles.message}>{message}</Text>}
+            {/* {message && <Text style={styles.message}>{message}</Text>} */}
         </View>
     );
 };
@@ -150,6 +176,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#000',
+    },
+    testButton: {
+        position: 'absolute',
+        bottom: -height * 0.05,
+        padding: 12,
+        backgroundColor: 'white',
+        borderRadius: 8,
+    },
+    testButtonText: {
+        fontSize: height * 0.02,
+        fontWeight: 'bold',
+        color: 'black',
     },
     instructions: {
         color: 'white',
@@ -184,12 +222,15 @@ const styles = StyleSheet.create({
     },
     figure: {
         position: 'absolute',
-        width: 100,
-        height: 100,
+        width: 140,
+        height: 140,
     },
     image: {
         width: '100%',
         height: '100%',
+        borderRadius: 5,
+        borderWidth: 2, // Width of the white outline
+        borderColor: 'white', // White border color
     },
     message: {
         color: 'yellow',

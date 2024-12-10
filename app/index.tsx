@@ -30,64 +30,62 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator>
         {/* No Header on StartScreen */}
-        {/* <Stack.Screen
+
+        <Stack.Screen
           name="StartScreen"
           component={StartScreen}
           options={{ headerShown: false }}
-        /> */}
-        {/* <Stack.Screen
-          name="CirclesScreen"
-          component={CirclesScreen}
-          options={{
-            header: () => <Header unlockedIndexes={[]} />,
-          }}
-        /> */}
-        {/* <Stack.Screen
+        />
+        {/* Header with unlockedIndexes for other screens */}
+        <Stack.Screen
           name="GameScreen"
           component={GameScreen}
           options={{
-            header: () => <Header unlockedIndexes={[0]} />,
+            header: () => <Header unlockedIndexes={[]} />,
           }}
-        /> */}
-        {/* Header with unlockedIndexes for other screens */}
-        {/* 
-
-        <Stack.Screen
-          name="WorkInProgress"
-          component={WorkInProgress}
-          options={{
-            header: () => <Header unlockedIndexes={[0]} />,
-          }}
-        /> 
-        */}
+        />
         <Stack.Screen
           name="HoldingHandsScreen"
           component={HoldingHandsScreen}
           options={{
-            header: () => <Header unlockedIndexes={[0, 1]} />,
+            header: () => <Header unlockedIndexes={[0]} />,
           }}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           name="PickRightScreen"
           component={PickRightScreen}
           options={{
-            header: () => <Header unlockedIndexes={[0, 1, 2]} />,
+            header: () => <Header unlockedIndexes={[0, 1]} />,
           }}
-        /> */}
-        {/* <Stack.Screen
+        />
+        <Stack.Screen
           name="PhotoConstructor"
           component={PhotoConstructor}
           options={{
-            header: () => <Header unlockedIndexes={[0, 1, 2, 3]} />,
+            header: () => <Header unlockedIndexes={[0, 1, 2]} />,
           }}
-        /> */}
-        {/* <Stack.Screen
-          name="BossFightScreen"
-          component={BossFightScreen}
+        />
+        <Stack.Screen
+          name="CirclesScreen"
+          component={CirclesScreen}
           options={{
             header: () => <Header unlockedIndexes={[0, 1, 2, 3]} />,
           }}
-        /> */}
+        />
+        <Stack.Screen
+          name="BossFightScreen"
+          component={BossFightScreen}
+          options={{
+            header: () => <Header unlockedIndexes={[0, 1, 2, 3, 4]} />,
+          }}
+        />
+        <Stack.Screen
+          name="WorkInProgress"
+          component={WorkInProgress}
+          options={{
+            header: () => <Header unlockedIndexes={[0, 1, 2, 3, 4]} />,
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

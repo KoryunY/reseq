@@ -106,7 +106,7 @@ const CirclesScreen: React.FC<Props> = ({ navigation }) => {
 
     const handleTestButtonPress = () => {
         if (centralCircle) {
-            navigation.navigate('GameScreen');
+            navigation.navigate('BossFightScreen');
         } else if (areArraysEqual(selectedCircles, winingCircles)) {
             setCentralCircle(true);
         } else {

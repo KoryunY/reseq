@@ -1,11 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-
-type RootStackParamList = {
-    StartScreen: undefined;
-    CirclesScreen: undefined;
-};
+import { RootStackParamList } from '../../app';
 
 type Props = {
     navigation: StackNavigationProp<RootStackParamList, 'StartScreen'>;
@@ -16,7 +12,7 @@ const StartScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.container}>
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate('CirclesScreen')}
+                onPress={() => navigation.navigate('GameScreen')}
             >
                 <Text style={styles.buttonText}>Start</Text>
             </TouchableOpacity>
